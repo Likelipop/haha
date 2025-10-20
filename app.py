@@ -1,5 +1,6 @@
 import streamlit as st
-
+import time
+import random
 def encode_text(text, key1, key2):
     """Shift ASCII of text characters using key1 and key2 alternately."""
     result = []
@@ -239,7 +240,6 @@ def decode_text(text: str, key1: int, key2: int) -> str:
     return "".join(out)
 
 
-
 # Precompute encoded versions (these are the "locked" texts).
 # Choose the secret key pairs you want to use to lock each passage:
 SECRET1 = (20, 10)
@@ -251,50 +251,91 @@ encoded2 = encode_text(text2, SECRET2[0], SECRET2[1])
 # ---------- Streamlit UI ----------
 # st.set_page_config(page_title="ASCII Unlocker", layout="centered")
 st.set_page_config(page_title="ASCII Unlocker", layout="wide")
-st.title("🔐 ASCII Unlocker — use sliders to find the key")
-
-col1, col2 = st.columns(2)
-with col1:
-    num1 = st.slider("Key 1", min_value=0, max_value=100, value=0)
-with col2:
-    num2 = st.slider("Key 2", min_value=0, max_value=100, value=0)
-
-close_score = min((abs(num1 - SECRET1[0]) + abs(num2 - SECRET1[1])),
-abs(num1 - SECRET2[0]) + abs(num2 - SECRET2[1]))  
-if (close_score) < 10:
-    st.write(f"🔥🔥🔥🔥")
-elif  close_score < 30:
-    st.write(f"🔥🔥")
-elif  close_score< 50:
-    st.write(f"🔥")
-elif  close_score < 70:
-    st.write(f"❄️")
-elif  close_score < 90:
-    st.write(f"❄️❄️")
-elif  close_score < 110:
-    st.write(f"❄️❄️❄️")
-else:
-    st.write(f"❄️❄️❄️")
+st.title("🔐 ASCII Unlocker — use sliders to find the key (but it was solved by Dan Thuong)")
 
 
+with st.empty():
+    st.cache_data.clear()
+    while 1:
+        for num1 in range(100):
+            for num2 in range(100):
+                close_score = min((abs(num1 - SECRET1[0]), abs(num2 - SECRET1[1])))
+                if (random.random() < 0.99999*(1-float(close_score/14000))) and ((num1,num2) != SECRET1) and ((num1,num2) != SECRET2) :
+                    continue
+                    
+                decoded_try_1 = decode_text(encoded1, num1, num2)
+                decoded_try_2 = decode_text(encoded2, num1, num2)
 
-# Try to decode both locked texts with the user's keys
-decoded_try_1 = decode_text(encoded1, num1, num2)
-decoded_try_2 = decode_text(encoded2, num1, num2)
+                # Display logic
+                if decoded_try_1 == text1:
+                    st.success("🎉 You unlocked Passage 1!")
+                    st.code(text1, language="text")
+                    time.sleep(2)
+                elif decoded_try_2 == text2:
+                    st.success("🎉 You unlocked Passage 2!")
+                    st.code(text2, language="text")
+                    time.sleep(2)
+                else:
+                    # If not unlocked, show the scrambled preview (monospace) so user can see progress
+                    st.info("Current decode attempt (scrambled):")
+                    st.code(decoded_try_1, language="text")
+                    time.sleep(.1)
+                    st.caption("Keep tuning the sliders to recover the original ASCII art!")
+                    
+                
+                st.markdown("---")
+                st.caption("Secrets used in this demo: Passage1=(12,34), Passage2=(56,78). Replace or hide these in production.")
 
-# Display logic
-if decoded_try_1 == text1:
-    st.success("🎉 You unlocked Passage 1!")
-    st.code(text1, language="text")
-elif decoded_try_2 == text2:
-    st.success("🎉 You unlocked Passage 2!")
-    st.code(text2, language="text")
-else:
-    # If not unlocked, show the scrambled preview (monospace) so user can see progress
-    st.info("Current decode attempt (scrambled):")
-    st.code(decoded_try_1, language="text")
-    st.caption("Keep tuning the sliders to recover the original ASCII art!")
+
+# with st.empty():
+#     for seconds in range(10):
+#         st.code(f"⏳ {seconds} seconds have passed")
+#         time.sleep(1)
+#     st.write(":material/check: 10 seconds over!")
+# st.button("Rerun")
+
+# with col1:
+#     num1 = st.slider("Key 1", min_value=0, max_value=100, value=0)
+# with col2:
+#     num2 = st.slider("Key 2", min_value=0, max_value=100, value=0)
+
+# close_score = min((abs(num1 - SECRET1[0]) + abs(num2 - SECRET1[1])),
+
+# abs(num1 - SECRET2[0]) + abs(num2 - SECRET2[1]))  
+# if (close_score) < 10:
+#     st.write(f"🔥🔥🔥🔥")
+# elif  close_score < 30:
+#     st.write(f"🔥🔥")
+# elif  close_score< 50:
+#     st.write(f"🔥")
+# elif  close_score < 70:
+#     st.write(f"❄️")
+# elif  close_score < 90:
+#     st.write(f"❄️❄️")
+# elif  close_score < 110:
+#     st.write(f"❄️❄️❄️")
+# else:
+#     st.write(f"❄️❄️❄️")
 
 
-st.markdown("---")
-st.caption("Secrets used in this demo: Passage1=(12,34), Passage2=(56,78). Replace or hide these in production.")
+
+# # Try to decode both locked texts with the user's keys
+# decoded_try_1 = decode_text(encoded1, num1, num2)
+# decoded_try_2 = decode_text(encoded2, num1, num2)
+
+# # Display logic
+# if decoded_try_1 == text1:
+#     st.success("🎉 You unlocked Passage 1!")
+#     st.code(text1, language="text")
+# elif decoded_try_2 == text2:
+#     st.success("🎉 You unlocked Passage 2!")
+#     st.code(text2, language="text")
+# else:
+#     # If not unlocked, show the scrambled preview (monospace) so user can see progress
+#     st.info("Current decode attempt (scrambled):")
+#     st.code(decoded_try_1, language="text")
+#     st.caption("Keep tuning the sliders to recover the original ASCII art!")
+
+
+# st.markdown("---")
+# st.caption("Secrets used in this demo: Passage1=(12,34), Passage2=(56,78). Replace or hide these in production.")
