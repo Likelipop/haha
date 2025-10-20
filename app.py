@@ -259,6 +259,25 @@ with col1:
 with col2:
     num2 = st.slider("Key 2", min_value=0, max_value=100, value=0)
 
+close_score = min((abs(num1 - SECRET1[0]) + abs(num2 - SECRET1[1])),
+abs(num1 - SECRET2[0]) + abs(num2 - SECRET2[1]))  
+if (close_score) < 10:
+    st.write(f"🔥🔥🔥🔥")
+elif  close_score < 30:
+    st.write(f"🔥🔥")
+elif  close_score< 50:
+    st.write(f"🔥")
+elif  close_score < 70:
+    st.write(f"❄️")
+elif  close_score < 90:
+    st.write(f"❄️❄️")
+elif  close_score < 110:
+    st.write(f"❄️❄️❄️")
+else:
+    st.write(f"❄️❄️❄️")
+
+
+
 # Try to decode both locked texts with the user's keys
 decoded_try_1 = decode_text(encoded1, num1, num2)
 decoded_try_2 = decode_text(encoded2, num1, num2)
@@ -276,6 +295,6 @@ else:
     st.code(decoded_try_1, language="text")
     st.caption("Keep tuning the sliders to recover the original ASCII art!")
 
-st.write(f"You selected **{num1}** and **{num2}**")
+
 st.markdown("---")
 st.caption("Secrets used in this demo: Passage1=(12,34), Passage2=(56,78). Replace or hide these in production.")
